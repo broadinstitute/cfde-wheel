@@ -11,6 +11,6 @@ export function resolveAsset(path) {
   if (!base) return path;
 
   const normalizedPath = path.replace(/^assets\//, "");
-  const assetRoot = base.includes("/src/") ? "/assets/" : "../assets/";
+  const assetRoot = base.includes("/src/") ? "/assets/" : "../public/assets/";
   return new URL(`${assetRoot}${normalizedPath}`, base).href;
 }
