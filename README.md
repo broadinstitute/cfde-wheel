@@ -24,7 +24,7 @@ The production artifact is `dist/cfde-wheel.js`.
 Add the script to your page:
 
 ```html
-<script src="/dist/cfde-wheel.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/broadinstitute/cfde-wheel@main/dist/cfde-wheel.js"></script>
 ```
 
 Then either use the custom element:
