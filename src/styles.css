@@ -1,0 +1,135 @@
+.cfde-wheel,
+.cfde-wheel *,
+.cfde-wheel *::before,
+.cfde-wheel *::after {
+  box-sizing: border-box;
+}
+
+.cfde-wheel {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.cfde-wheel__underlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.cfde-wheel__close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.cfde-wheel__content {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+  pointer-events: none;
+}
+
+.cfde-wheel__visual {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.cfde-wheel__svg {
+  width: min(88vw, 980px);
+  max-height: calc(100vh - 80px);
+  height: auto;
+  pointer-events: all;
+}
+
+.cfde-wheel__interactive:hover {
+  cursor: pointer;
+}
+
+.cfde-wheel__center-slice:hover {
+  opacity: 0.75;
+}
+
+.cfde-wheel__ring-circle:hover,
+.cfde-wheel__core:hover {
+  fill: #ccc;
+}
+
+.cfde-wheel__label {
+  fill: #fff;
+  font-size: 14px;
+  text-transform: uppercase;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.cfde-wheel__no-events,
+.cfde-wheel__ring-image {
+  pointer-events: none;
+}
+
+.cfde-wheel__ring-image {
+  /*clip-path: circle(17.5px at 17.5px 17.5px);*/
+  mix-blend-mode: darken;
+}
+
+.cfde-wheel__tooltip {
+  position: absolute;
+  max-width: 220px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: rgba(30, 30, 30, 0.9);
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+[data-cfde-wheel-trigger] {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .cfde-wheel__content {
+    padding: 20px;
+  }
+
+  .cfde-wheel__close {
+    top: 12px;
+    right: 12px;
+  }
+
+  .cfde-wheel__svg {
+    width: min(95vw, 700px);
+    max-height: calc(100vh - 40px);
+  }
+
+  .cfde-wheel__tooltip {
+    max-width: 180px;
+    font-size: 12px;
+  }
+}

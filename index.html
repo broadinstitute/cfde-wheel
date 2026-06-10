@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CFDE Wheel Demo</title>
+  <script type="module" src="/src/index.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f6f7fb 0%, #dfe9f3 100%);
+      color: #16324f;
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .demo-card {
+      width: min(680px, 100%);
+      padding: 32px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 20px 60px rgba(22, 50, 79, 0.18);
+      text-align: center;
+    }
+
+    .demo-card button {
+      padding: 14px 20px;
+      border: 0;
+      border-radius: 999px;
+      background: #1c5084;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .icon-row {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .icon-box {
+      width: 72px;
+      height: 72px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(28, 80, 132, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="demo-card">
+      <h1>CFDE Wheel Widget</h1>
+      <button type="button" data-cfde-wheel-trigger="true">Open CFDE Wheel</button>
+      <div class="icon-row">
+        <div class="icon-box">
+          <cfde-wheel></cfde-wheel>
+        </div>
+        <cfde-wheel size="48"></cfde-wheel>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
