@@ -60,7 +60,7 @@
 }
 
 .cfde-wheel__svg {
-  width: min(88vw, 980px);
+  width: max-content;
   max-height: calc(100vh - 80px);
   height: auto;
   pointer-events: all;

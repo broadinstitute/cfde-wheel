@@ -8,16 +8,13 @@ export function initScriptBase() {
     return;
   }
 
-  try {
-    if (import.meta.url) {
-      SCRIPT_BASE = import.meta.url.replace(/[^/]+$/, "");
-      return;
-    }
-  } catch {}
+  const matchingScripts = Array.from(document.querySelectorAll("script[src]"))
+    .map((script) => script.getAttribute("src"))
+    .filter((src) => typeof src === "string" && src.includes("cfde-wheel"));
 
-  const script = document.querySelector('script[src*="cfde-wheel"]');
-  if (script?.src) {
-    SCRIPT_BASE = script.src.replace(/[^/]+$/, "");
+  const scriptSrc = matchingScripts.at(-1);
+  if (scriptSrc) {
+    SCRIPT_BASE = new URL(scriptSrc, document.baseURI).href.replace(/[^/]+$/, "");
   }
 }
 
