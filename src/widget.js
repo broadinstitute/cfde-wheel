@@ -4,7 +4,6 @@ import { resolveAsset } from "./utils/resolve-asset.js";
 const DEFAULT_OPTIONS = {
   dccs: DEFAULT_DCCS,
   centers: DEFAULT_CENTERS,
-  target: null,
   closeOnEscape: true
 };
 
@@ -233,8 +232,7 @@ export class CfdeWheelWidget {
     this.previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    const target = this.options.target || document.body;
-    target.appendChild(this.root);
+    document.body.appendChild(this.root);
 
     this.alignPanels();
     window.addEventListener("resize", this.alignPanels);
