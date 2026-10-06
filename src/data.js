@@ -211,7 +211,7 @@ export const DEFAULT_DCCS = [
     id: "f65babf7-2875-5725-9635-210d654533f1",
     short_label: "ExRNA",
     dataurl: "https://cfde.cloud/info/dcc/ExRNA",
-    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=ExRNA",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=exRNA",
     homepage: "https://exrna.org/",
     icon: "assets/exrna.png",
     name: "Extracellular RNA communication",

@@ -206,6 +206,7 @@ export class CfdeWheelWidget {
     this.tooltipEl = null;
     this.introEl = null;
     this.selectedDccIndex = null;
+    this.omicsHeld = false;
     this.previousBodyOverflow = "";
     this.alignPanels = this.alignPanels.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -254,7 +255,7 @@ export class CfdeWheelWidget {
 
     // Mobile: panels stack under the wheel via CSS, centered and as wide as the drawn wheel.
     if (window.matchMedia("(max-width: 768px)").matches) {
-      ["top", "right", "bottom"].forEach((p) => {
+      ["top", "right", "bottom", "maxHeight", "overflowY"].forEach((p) => {
         intro.style[p] = "";
         card.style[p] = "";
       });
@@ -296,9 +297,17 @@ export class CfdeWheelWidget {
     // Right margin equals the gap between the wheel and the left edge.
     const gap = Math.max(0, Math.round(left - rootRect.left));
     intro.style.right = `${gap}px`;
-    card.style.right = `${Math.max(0, gap - 20)}px`; // card has 20px side padding
+    card.style.right = `${gap}px`;
     intro.style.top = `${Math.round(top - rootRect.top) + 15}px`;
     card.style.bottom = `${Math.round(rootRect.bottom - bottom) + 15}px`;
+
+    // Never let the detail box run into the omics card: cap its height to the
+    // space above the card and let it scroll if the content is taller.
+    const introTop = intro.getBoundingClientRect().top;
+    const cardTop = card.getBoundingClientRect().top;
+    const room = Math.max(80, Math.floor(cardTop - introTop - 12));
+    intro.style.maxHeight = `${room}px`;
+    intro.style.overflowY = "auto";
   }
 
   close() {
@@ -313,6 +322,7 @@ export class CfdeWheelWidget {
     this.tooltipEl = null;
     this.introEl = null;
     this.selectedDccIndex = null;
+    this.omicsHeld = false;
 
     document.body.style.overflow = this.previousBodyOverflow;
     document.removeEventListener("keydown", this.handleKeydown);
@@ -353,7 +363,9 @@ export class CfdeWheelWidget {
       if (this.selectedDccIndex === index) {
         // Same icon clicked again: remove ring, restore original text box.
         this.selectedDccIndex = null;
+        this.omicsHeld = false;
         dccNode.classList.remove("cfde-wheel__dcc--selected");
+        this.clearOmicsHighlight();
         this.renderIntro(null);
       } else {
         // New icon: move the orange ring, update text box.
@@ -363,14 +375,30 @@ export class CfdeWheelWidget {
         }
         this.selectedDccIndex = index;
         dccNode.classList.add("cfde-wheel__dcc--selected");
+        // Hold this icon's omics highlight until the next icon/omics hover.
+        this.highlightOmics(this.options.dccs[index]?.omics || []);
+        this.omicsHeld = true;
         this.renderIntro(this.options.dccs[index]);
       }
     }
   }
 
+  // Ends the click-hold: drops the selected ring and held omics highlight,
+  // but leaves the detail box showing.
+  releaseHold() {
+    if (!this.omicsHeld || !this.root) return;
+    this.omicsHeld = false;
+    this.root.querySelectorAll(".cfde-wheel__dcc--selected").forEach((node) => {
+      node.classList.remove("cfde-wheel__dcc--selected");
+    });
+    this.selectedDccIndex = null;
+    this.clearOmicsHighlight();
+  }
+
   handlePointerOver(event) {
     const omicsBtn = event.target.closest(".cfde-wheel__omics-btn");
     if (omicsBtn) {
+      this.releaseHold();
       this.highlightDccsForOmics(omicsBtn.dataset.wheelOmics);
       return;
     }
@@ -384,6 +412,8 @@ export class CfdeWheelWidget {
 
     const dccNode = event.target.closest("[data-wheel-kind='dcc']");
     if (dccNode) {
+      // Hovering the clicked icon itself doesn't end the hold; any other icon does.
+      if (Number(dccNode.dataset.wheelIndex) !== this.selectedDccIndex) this.releaseHold();
       const item = this.options.dccs[Number(dccNode.dataset.wheelIndex)];
       const tooltipText = [item?.short_label, item?.name].filter(Boolean).join("\n");
       this.showTooltip(tooltipText, event.target.getBoundingClientRect());
@@ -401,7 +431,7 @@ export class CfdeWheelWidget {
     }
 
     this.hideTooltip();
-    this.clearOmicsHighlight();
+    if (!this.omicsHeld) this.clearOmicsHighlight();
     this.clearDccRingHighlight();
   }
 
@@ -459,6 +489,7 @@ export class CfdeWheelWidget {
     if (!item || !(item.short_label || item.name || item.description)) {
       this.introEl.classList.remove("cfde-wheel__intro--detail");
       this.introEl.innerHTML = `<div class="cfde-wheel__intro-default">${escapeHtml(DEFAULT_INTRO)}</div>`;
+      this.alignPanels();
       return;
     }
 
@@ -490,6 +521,7 @@ export class CfdeWheelWidget {
       `<div class="cfde-wheel__intro-desc">${escapeHtml(description)}</div>`,
       linksBlock
     ].join("");
+    this.alignPanels();
   }
 
   navigate(item) {
