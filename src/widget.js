@@ -363,7 +363,6 @@ export class CfdeWheelWidget {
       if (this.selectedDccIndex === index) {
         // Same icon clicked again: remove ring, restore original text box.
         this.selectedDccIndex = null;
-        this.omicsHeld = false;
         dccNode.classList.remove("cfde-wheel__dcc--selected");
         this.clearOmicsHighlight();
         this.renderIntro(null);
@@ -375,30 +374,33 @@ export class CfdeWheelWidget {
         }
         this.selectedDccIndex = index;
         dccNode.classList.add("cfde-wheel__dcc--selected");
-        // Hold this icon's omics highlight until the next icon/omics hover.
         this.highlightOmics(this.options.dccs[index]?.omics || []);
-        this.omicsHeld = true;
         this.renderIntro(this.options.dccs[index]);
       }
     }
   }
 
-  // Ends the click-hold: drops the selected ring and held omics highlight,
-  // but leaves the detail box showing.
-  releaseHold() {
-    if (!this.omicsHeld || !this.root) return;
-    this.omicsHeld = false;
+  // While hovering something else, hide the clicked icon's ring and omics highlight
+  // (the detail box stays). restoreSelection() brings them back when the hover ends.
+  suspendSelection() {
+    if (this.selectedDccIndex === null || !this.root) return;
     this.root.querySelectorAll(".cfde-wheel__dcc--selected").forEach((node) => {
       node.classList.remove("cfde-wheel__dcc--selected");
     });
-    this.selectedDccIndex = null;
     this.clearOmicsHighlight();
+  }
+
+  restoreSelection() {
+    if (this.selectedDccIndex === null || !this.root) return;
+    const node = this.root.querySelector(`[data-wheel-kind='dcc'][data-wheel-index='${this.selectedDccIndex}']`);
+    if (node) node.classList.add("cfde-wheel__dcc--selected");
+    this.highlightOmics(this.options.dccs[this.selectedDccIndex]?.omics || []);
   }
 
   handlePointerOver(event) {
     const omicsBtn = event.target.closest(".cfde-wheel__omics-btn");
     if (omicsBtn) {
-      this.releaseHold();
+      this.suspendSelection();
       this.highlightDccsForOmics(omicsBtn.dataset.wheelOmics);
       return;
     }
@@ -412,8 +414,7 @@ export class CfdeWheelWidget {
 
     const dccNode = event.target.closest("[data-wheel-kind='dcc']");
     if (dccNode) {
-      // Hovering the clicked icon itself doesn't end the hold; any other icon does.
-      if (Number(dccNode.dataset.wheelIndex) !== this.selectedDccIndex) this.releaseHold();
+      if (Number(dccNode.dataset.wheelIndex) !== this.selectedDccIndex) this.suspendSelection();
       const item = this.options.dccs[Number(dccNode.dataset.wheelIndex)];
       const tooltipText = [item?.short_label, item?.name].filter(Boolean).join("\n");
       this.showTooltip(tooltipText, event.target.getBoundingClientRect());
@@ -431,8 +432,9 @@ export class CfdeWheelWidget {
     }
 
     this.hideTooltip();
-    if (!this.omicsHeld) this.clearOmicsHighlight();
+    this.clearOmicsHighlight();
     this.clearDccRingHighlight();
+    this.restoreSelection();
   }
 
   highlightDccsForOmics(omicsKey) {
