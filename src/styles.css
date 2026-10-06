@@ -42,6 +42,116 @@
   line-height: 1;
 }
 
+.cfde-wheel__intro {
+  position: absolute;
+  top: 40px;
+  right: 65px;
+  z-index: 1;
+  max-width: 480px;
+  width: 480px;
+  margin: 0;
+  padding: 16px 20px;
+  background: #000;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.5;
+  text-align: left;
+  pointer-events: none;
+}
+
+.cfde-wheel__intro--detail {
+  background: #fff;
+  color: #000;
+  pointer-events: auto; /* allow scrolling when capped above the omics card */
+}
+
+.cfde-wheel__intro-default {
+  font-size: 20px;
+}
+
+.cfde-wheel__intro-short {
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.cfde-wheel__intro-name {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.cfde-wheel__intro-desc {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.cfde-wheel__intro-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+@media (max-width: 768px) {
+  .cfde-wheel__intro-links {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+.cfde-wheel__intro-visit {
+  text-align: right;
+  font-size: 15px;
+}
+
+.cfde-wheel__intro-visit a {
+  color: #7fb3ff;
+  text-decoration: underline;
+  pointer-events: auto;
+}
+
+.cfde-wheel__intro-visit a:hover {
+  color: #a9ccff;
+}
+
+.cfde-wheel__omics-card {
+  position: absolute;
+  bottom: 24px;
+  right: 65px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 480px;
+  padding: 0;
+  background: transparent;
+}
+
+.cfde-wheel__omics-btn {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cfde-wheel__omics-btn:hover {
+  background: #ff8c00;
+}
+
+.cfde-wheel__omics-btn--active {
+  background: #ff8c00;
+}
+
+.cfde-wheel__omics-btn--active:hover {
+  background: #ff8c00;
+}
+
 .cfde-wheel__content {
   position: relative;
   display: flex;
@@ -57,6 +167,8 @@
   flex: 1;
   align-items: center;
   justify-content: center;
+  margin-right: 480px;
+  transform: translateX(-10px);
 }
 
 .cfde-wheel__svg {
@@ -74,9 +186,22 @@
   opacity: 0.75;
 }
 
-.cfde-wheel__ring-circle:hover,
 .cfde-wheel__core:hover {
   fill: #ccc;
+}
+
+.cfde-wheel__ring-circle {
+  transition: stroke 0.15s ease;
+}
+
+.cfde-wheel__dcc--active .cfde-wheel__ring-circle {
+  stroke: #ff8c00;
+  stroke-width: 3;
+}
+
+.cfde-wheel__dcc--selected .cfde-wheel__ring-circle {
+  stroke: #ff8c00;
+  stroke-width: 4;
 }
 
 .cfde-wheel__label {
@@ -102,9 +227,10 @@
   max-width: 220px;
   padding: 6px 10px;
   border-radius: 4px;
-  background: rgba(30, 30, 30, 0.9);
-  color: #fff;
+  background: #fff;
+  color: #000;
   font-size: 14px;
+  white-space: pre-line;
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
@@ -114,18 +240,87 @@
 }
 
 @media (max-width: 768px) {
+  .cfde-wheel {
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    padding-bottom: 24px;
+  }
+
+  .cfde-wheel__underlay {
+    position: fixed;
+  }
+
   .cfde-wheel__content {
+    order: 1;
+    flex: none;
+    height: auto;
     padding: 20px;
   }
 
   .cfde-wheel__close {
+    position: fixed;
     top: 12px;
     right: 12px;
+  }
+
+  .cfde-wheel__intro,
+  .cfde-wheel__omics-card {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    align-self: center;
+    width: calc(100% - 40px);
+    margin: 0 auto 16px;
+  }
+
+  .cfde-wheel__omics-card {
+    justify-content: center;
+  }
+
+  .cfde-wheel__intro {
+    order: 2;
+  }
+
+  .cfde-wheel__omics-card {
+    order: 3;
+    padding: 0;
   }
 
   .cfde-wheel__svg {
     width: min(95vw, 700px);
     max-height: calc(100vh - 40px);
+  }
+
+  .cfde-wheel__visual {
+    margin-right: 0;
+    transform: none;
+  }
+
+  .cfde-wheel__intro {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .cfde-wheel__intro-default {
+    font-size: 14px;
+  }
+
+  .cfde-wheel__intro-short {
+    font-size: 18px;
+  }
+
+  .cfde-wheel__intro-name {
+    font-size: 14px;
+  }
+
+  .cfde-wheel__intro-desc {
+    font-size: 12px;
+  }
+
+  .cfde-wheel__intro-visit {
+    font-size: 12px;
   }
 
   .cfde-wheel__tooltip {

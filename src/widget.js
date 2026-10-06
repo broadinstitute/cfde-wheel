@@ -14,6 +14,8 @@ const RING_RADIUS = 150;
 const CIRCLE_SIZE = 35;
 const ICON_SIZE = 30;
 
+const DEFAULT_INTRO = "The Common Fund Data Ecosystem (CFDE) integrates data and resources from across NIH Common Fund programs (circles) with support from 5 centers. Hover over each part of the wheel for more information.";
+
 function sanitizeUrl(url) {
   if (typeof url !== "string") return "";
   const value = url.trim();
@@ -102,7 +104,7 @@ function buildDccNodes(dccs) {
   return dccs.map((item, index) => {
     const point = getPoint(index, dccs.length);
     return `
-      <g data-wheel-kind="dcc" data-wheel-index="${index}">
+      <g data-wheel-kind="dcc" data-wheel-index="${index}" data-wheel-omics="${escapeHtml((item.omics || []).map(normalizeOmics).filter(Boolean).join(" "))}">
         <circle
           cx="${point.x}"
           cy="${point.y}"
@@ -127,10 +129,39 @@ function buildDccNodes(dccs) {
   }).join("");
 }
 
+const OMICS_BUTTONS = [
+  "Epigenomics",
+  "Genomics",
+  "Glycomics",
+  "Glycoproteomics",
+  "Kinomics",
+  "Lipidomics",
+  "Metabolomics",
+  "Multi-omics",
+  "Proteomics",
+  "Spatial multi-omics",
+  "Spatial proteomics",
+  "Spatial Transcriptomics",
+  "Transcriptomics"
+];
+
+function normalizeOmics(value) {
+  return String(value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function buildOmicsButtons() {
+  return OMICS_BUTTONS.map(
+    (label) => `
+      <button type="button" class="cfde-wheel__omics-btn" data-wheel-omics="${escapeHtml(normalizeOmics(label))}">${escapeHtml(label)}</button>
+    `
+  ).join("");
+}
+
 function buildMarkup(options) {
   return `
     <div class="cfde-wheel__underlay" data-wheel-close="true"></div>
     <button type="button" class="cfde-wheel__close" aria-label="Close CFDE wheel" data-wheel-close="true">✖</button>
+    <div class="cfde-wheel__intro" data-wheel-intro></div>
     <div class="cfde-wheel__content">
       <div class="cfde-wheel__visual">
         <svg class="cfde-wheel__svg" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 382.365 366.599" role="img" aria-label="CFDE wheel">
@@ -159,6 +190,7 @@ function buildMarkup(options) {
         <div class="cfde-wheel__tooltip" hidden></div>
       </div>
     </div>
+    <div class="cfde-wheel__omics-card">${buildOmicsButtons()}</div>
   `;
 }
 
@@ -172,7 +204,11 @@ export class CfdeWheelWidget {
     };
     this.root = null;
     this.tooltipEl = null;
+    this.introEl = null;
+    this.selectedDccIndex = null;
+    this.omicsHeld = false;
     this.previousBodyOverflow = "";
+    this.alignPanels = this.alignPanels.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleRootClick = this.handleRootClick.bind(this);
     this.handlePointerOver = this.handlePointerOver.bind(this);
@@ -186,6 +222,9 @@ export class CfdeWheelWidget {
     this.root.className = "cfde-wheel";
     this.root.innerHTML = buildMarkup(this.options);
     this.tooltipEl = this.root.querySelector(".cfde-wheel__tooltip");
+    this.introEl = this.root.querySelector("[data-wheel-intro]");
+
+    this.renderIntro(null);
 
     this.root.addEventListener("click", this.handleRootClick);
     this.root.addEventListener("mouseover", this.handlePointerOver);
@@ -196,11 +235,79 @@ export class CfdeWheelWidget {
 
     this.options.target.appendChild(this.root);
 
+    this.alignPanels();
+    window.addEventListener("resize", this.alignPanels);
+
     if (this.options.closeOnEscape) {
       document.addEventListener("keydown", this.handleKeydown);
     }
 
     return this.root;
+  }
+
+  // Align intro top and omics card bottom with the wheel's drawn top/bottom edges.
+  alignPanels() {
+    if (!this.root) return;
+    const svg = this.root.querySelector(".cfde-wheel__svg");
+    const intro = this.root.querySelector(".cfde-wheel__intro");
+    const card = this.root.querySelector(".cfde-wheel__omics-card");
+    if (!svg || !intro || !card) return;
+
+    // Mobile: panels stack under the wheel via CSS, centered and as wide as the drawn wheel.
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      ["top", "right", "bottom", "maxHeight", "overflowY"].forEach((p) => {
+        intro.style[p] = "";
+        card.style[p] = "";
+      });
+      let l = Infinity;
+      let r = -Infinity;
+      svg.querySelectorAll(":scope > g").forEach((g) => {
+        const b = g.getBoundingClientRect();
+        if (!b.width) return;
+        l = Math.min(l, b.left);
+        r = Math.max(r, b.right);
+      });
+      if (isFinite(l) && isFinite(r)) {
+        const w = `${Math.round(r - l)}px`;
+        intro.style.width = w;
+        intro.style.maxWidth = w;
+        card.style.width = w;
+        card.style.maxWidth = w;
+      }
+      return;
+    }
+    ["width", "maxWidth"].forEach((p) => {
+      intro.style[p] = "";
+      card.style[p] = "";
+    });
+
+    let top = Infinity;
+    let bottom = -Infinity;
+    let left = Infinity;
+    svg.querySelectorAll(":scope > g").forEach((g) => {
+      const r = g.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      top = Math.min(top, r.top);
+      bottom = Math.max(bottom, r.bottom);
+      left = Math.min(left, r.left);
+    });
+    if (!isFinite(top) || !isFinite(bottom)) return;
+
+    const rootRect = this.root.getBoundingClientRect();
+    // Right margin equals the gap between the wheel and the left edge.
+    const gap = Math.max(0, Math.round(left - rootRect.left));
+    intro.style.right = `${gap}px`;
+    card.style.right = `${gap}px`;
+    intro.style.top = `${Math.round(top - rootRect.top) + 15}px`;
+    card.style.bottom = `${Math.round(rootRect.bottom - bottom) + 15}px`;
+
+    // Never let the detail box run into the omics card: cap its height to the
+    // space above the card and let it scroll if the content is taller.
+    const introTop = intro.getBoundingClientRect().top;
+    const cardTop = card.getBoundingClientRect().top;
+    const room = Math.max(80, Math.floor(cardTop - introTop - 12));
+    intro.style.maxHeight = `${room}px`;
+    intro.style.overflowY = "auto";
   }
 
   close() {
@@ -209,9 +316,13 @@ export class CfdeWheelWidget {
     this.root.removeEventListener("click", this.handleRootClick);
     this.root.removeEventListener("mouseover", this.handlePointerOver);
     this.root.removeEventListener("mouseout", this.handlePointerOut);
+    window.removeEventListener("resize", this.alignPanels);
     this.root.remove();
     this.root = null;
     this.tooltipEl = null;
+    this.introEl = null;
+    this.selectedDccIndex = null;
+    this.omicsHeld = false;
 
     document.body.style.overflow = this.previousBodyOverflow;
     document.removeEventListener("keydown", this.handleKeydown);
@@ -234,6 +345,11 @@ export class CfdeWheelWidget {
       return;
     }
 
+    // Let the "Visit" link in the intro box open its own tab without toggling selection.
+    if (event.target.closest("[data-wheel-intro]")) {
+      return;
+    }
+
     const centerSlice = event.target.closest(".cfde-wheel__center-slice");
     if (centerSlice) {
       const item = this.options.centers[Number(centerSlice.dataset.wheelIndex)];
@@ -243,12 +359,52 @@ export class CfdeWheelWidget {
 
     const dccNode = event.target.closest("[data-wheel-kind='dcc']");
     if (dccNode) {
-      const item = this.options.dccs[Number(dccNode.dataset.wheelIndex)];
-      this.navigate(item);
+      const index = Number(dccNode.dataset.wheelIndex);
+      if (this.selectedDccIndex === index) {
+        // Same icon clicked again: remove ring, restore original text box.
+        this.selectedDccIndex = null;
+        dccNode.classList.remove("cfde-wheel__dcc--selected");
+        this.clearOmicsHighlight();
+        this.renderIntro(null);
+      } else {
+        // New icon: move the orange ring, update text box.
+        if (this.selectedDccIndex !== null) {
+          const prev = this.root.querySelector(`[data-wheel-kind='dcc'][data-wheel-index='${this.selectedDccIndex}']`);
+          if (prev) prev.classList.remove("cfde-wheel__dcc--selected");
+        }
+        this.selectedDccIndex = index;
+        dccNode.classList.add("cfde-wheel__dcc--selected");
+        this.highlightOmics(this.options.dccs[index]?.omics || []);
+        this.renderIntro(this.options.dccs[index]);
+      }
     }
   }
 
+  // While hovering something else, hide the clicked icon's ring and omics highlight
+  // (the detail box stays). restoreSelection() brings them back when the hover ends.
+  suspendSelection() {
+    if (this.selectedDccIndex === null || !this.root) return;
+    this.root.querySelectorAll(".cfde-wheel__dcc--selected").forEach((node) => {
+      node.classList.remove("cfde-wheel__dcc--selected");
+    });
+    this.clearOmicsHighlight();
+  }
+
+  restoreSelection() {
+    if (this.selectedDccIndex === null || !this.root) return;
+    const node = this.root.querySelector(`[data-wheel-kind='dcc'][data-wheel-index='${this.selectedDccIndex}']`);
+    if (node) node.classList.add("cfde-wheel__dcc--selected");
+    this.highlightOmics(this.options.dccs[this.selectedDccIndex]?.omics || []);
+  }
+
   handlePointerOver(event) {
+    const omicsBtn = event.target.closest(".cfde-wheel__omics-btn");
+    if (omicsBtn) {
+      this.suspendSelection();
+      this.highlightDccsForOmics(omicsBtn.dataset.wheelOmics);
+      return;
+    }
+
     const centerSlice = event.target.closest(".cfde-wheel__center-slice");
     if (centerSlice) {
       const item = this.options.centers[Number(centerSlice.dataset.wheelIndex)];
@@ -258,13 +414,17 @@ export class CfdeWheelWidget {
 
     const dccNode = event.target.closest("[data-wheel-kind='dcc']");
     if (dccNode) {
+      if (Number(dccNode.dataset.wheelIndex) !== this.selectedDccIndex) this.suspendSelection();
       const item = this.options.dccs[Number(dccNode.dataset.wheelIndex)];
-      this.showTooltip(item?.description || "", event.target.getBoundingClientRect());
+      const tooltipText = [item?.short_label, item?.name].filter(Boolean).join("\n");
+      this.showTooltip(tooltipText, event.target.getBoundingClientRect());
+      this.highlightOmics(item?.omics);
+      dccNode.classList.add("cfde-wheel__dcc--active");
     }
   }
 
   handlePointerOut(event) {
-    const leavingRelevantNode = event.target.closest(".cfde-wheel__interactive, [data-wheel-kind='dcc']");
+    const leavingRelevantNode = event.target.closest(".cfde-wheel__interactive, [data-wheel-kind='dcc'], .cfde-wheel__omics-btn");
     if (!leavingRelevantNode) return;
 
     if (event.relatedTarget && leavingRelevantNode.contains(event.relatedTarget)) {
@@ -272,6 +432,39 @@ export class CfdeWheelWidget {
     }
 
     this.hideTooltip();
+    this.clearOmicsHighlight();
+    this.clearDccRingHighlight();
+    this.restoreSelection();
+  }
+
+  highlightDccsForOmics(omicsKey) {
+    if (!this.root || !omicsKey) return;
+    this.root.querySelectorAll("[data-wheel-kind='dcc']").forEach((node) => {
+      const keys = (node.dataset.wheelOmics || "").split(" ");
+      node.classList.toggle("cfde-wheel__dcc--active", keys.includes(omicsKey));
+    });
+  }
+
+  clearDccRingHighlight() {
+    if (!this.root) return;
+    this.root.querySelectorAll(".cfde-wheel__dcc--active").forEach((node) => {
+      node.classList.remove("cfde-wheel__dcc--active");
+    });
+  }
+
+  highlightOmics(omics) {
+    if (!this.root || !Array.isArray(omics)) return;
+    const keys = new Set(omics.map(normalizeOmics).filter(Boolean));
+    this.root.querySelectorAll(".cfde-wheel__omics-btn").forEach((button) => {
+      button.classList.toggle("cfde-wheel__omics-btn--active", keys.has(button.dataset.wheelOmics));
+    });
+  }
+
+  clearOmicsHighlight() {
+    if (!this.root) return;
+    this.root.querySelectorAll(".cfde-wheel__omics-btn--active").forEach((button) => {
+      button.classList.remove("cfde-wheel__omics-btn--active");
+    });
   }
 
   showTooltip(text, rect, yOffset) {
@@ -290,6 +483,47 @@ export class CfdeWheelWidget {
     if (this.tooltipEl) {
       this.tooltipEl.hidden = true;
     }
+  }
+
+  renderIntro(item) {
+    if (!this.introEl) return;
+
+    if (!item || !(item.short_label || item.name || item.description)) {
+      this.introEl.classList.remove("cfde-wheel__intro--detail");
+      this.introEl.innerHTML = `<div class="cfde-wheel__intro-default">${escapeHtml(DEFAULT_INTRO)}</div>`;
+      this.alignPanels();
+      return;
+    }
+
+    this.introEl.classList.add("cfde-wheel__intro--detail");
+
+    const shortLabel = item.short_label || "";
+    const name = item.name || "";
+    const description = item.description || "";
+    const homepage = sanitizeUrl(item?.homepage);
+
+    const visitLine = homepage
+      ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(homepage)}" target="_blank" rel="noopener noreferrer">Visit ${escapeHtml(shortLabel)}</a></div>`
+      : `<div class="cfde-wheel__intro-visit">Visit ${escapeHtml(shortLabel)}</div>`;
+
+    const dataUrl = sanitizeUrl(item?.dataurl);
+    const dataLine = dataUrl
+      ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(dataUrl)}" target="_blank" rel="noopener noreferrer">Explore Data</a></div>`
+      : "";
+    const knowledgeUrl = sanitizeUrl(item?.knowledgeurl);
+    const knowledgeLine = knowledgeUrl
+      ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(knowledgeUrl)}" target="_blank" rel="noopener noreferrer">Explore Knowledge</a></div>`
+      : "";
+    const linksBlock = `<div class="cfde-wheel__intro-links">${visitLine}${dataLine}${knowledgeLine}</div>`;
+
+    this.introEl.innerHTML = [
+      `<div class="cfde-wheel__intro-short">${escapeHtml(shortLabel)}</div>`,
+      `<div class="cfde-wheel__intro-name">${escapeHtml(name)}</div>`,
+      "<br />",
+      `<div class="cfde-wheel__intro-desc">${escapeHtml(description)}</div>`,
+      linksBlock
+    ].join("");
+    this.alignPanels();
   }
 
   navigate(item) {
