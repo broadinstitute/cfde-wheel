@@ -42,6 +42,95 @@
   line-height: 1;
 }
 
+.cfde-wheel__intro {
+  position: absolute;
+  top: 40px;
+  right: 65px;
+  z-index: 1;
+  max-width: 480px;
+  width: 480px;
+  margin: 0;
+  padding: 16px 20px;
+  background: #000;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.5;
+  text-align: left;
+  pointer-events: none;
+}
+
+.cfde-wheel__intro-default {
+  font-size: 20px;
+}
+
+.cfde-wheel__intro-short {
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.cfde-wheel__intro-name {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.cfde-wheel__intro-desc {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.cfde-wheel__intro-visit {
+  text-align: right;
+  font-size: 15px;
+}
+
+.cfde-wheel__intro-visit a {
+  color: #7fb3ff;
+  text-decoration: underline;
+  pointer-events: auto;
+}
+
+.cfde-wheel__intro-visit a:hover {
+  color: #a9ccff;
+}
+
+.cfde-wheel__omics-card {
+  position: absolute;
+  bottom: 24px;
+  right: 65px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 480px;
+  padding: 16px;
+  background: transparent;
+}
+
+.cfde-wheel__omics-btn {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cfde-wheel__omics-btn:hover {
+  background: #ff8c00;
+}
+
+.cfde-wheel__omics-btn--active {
+  background: #ff8c00;
+}
+
+.cfde-wheel__omics-btn--active:hover {
+  background: #ff8c00;
+}
+
 .cfde-wheel__content {
   position: relative;
   display: flex;
@@ -57,6 +146,7 @@
   flex: 1;
   align-items: center;
   justify-content: center;
+  margin-right: 480px;
 }
 
 .cfde-wheel__svg {
@@ -74,9 +164,22 @@
   opacity: 0.75;
 }
 
-.cfde-wheel__ring-circle:hover,
 .cfde-wheel__core:hover {
   fill: #ccc;
+}
+
+.cfde-wheel__ring-circle {
+  transition: stroke 0.15s ease;
+}
+
+.cfde-wheel__dcc--active .cfde-wheel__ring-circle {
+  stroke: #ff8c00;
+  stroke-width: 3;
+}
+
+.cfde-wheel__dcc--selected .cfde-wheel__ring-circle {
+  stroke: #ff8c00;
+  stroke-width: 4;
 }
 
 .cfde-wheel__label {
@@ -102,9 +205,10 @@
   max-width: 220px;
   padding: 6px 10px;
   border-radius: 4px;
-  background: rgba(30, 30, 30, 0.9);
-  color: #fff;
+  background: #fff;
+  color: #000;
   font-size: 14px;
+  white-space: pre-line;
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
@@ -126,6 +230,42 @@
   .cfde-wheel__svg {
     width: min(95vw, 700px);
     max-height: calc(100vh - 40px);
+  }
+
+  .cfde-wheel__visual {
+    margin-right: 0;
+  }
+
+  .cfde-wheel__intro {
+    width: 260px;
+    max-width: 260px;
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+
+  .cfde-wheel__intro-default {
+    font-size: 14px;
+  }
+
+  .cfde-wheel__intro-short {
+    font-size: 18px;
+  }
+
+  .cfde-wheel__intro-name {
+    font-size: 14px;
+  }
+
+  .cfde-wheel__intro-desc {
+    font-size: 12px;
+  }
+
+  .cfde-wheel__intro-visit {
+    font-size: 12px;
+  }
+
+  .cfde-wheel__omics-card {
+    width: 260px;
+    max-width: 260px;
   }
 
   .cfde-wheel__tooltip {

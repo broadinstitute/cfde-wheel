@@ -14,6 +14,8 @@ const RING_RADIUS = 150;
 const CIRCLE_SIZE = 35;
 const ICON_SIZE = 30;
 
+const DEFAULT_INTRO = "The Common Fund Data Ecosystem (CFDE) integrates data and resources from across NIH Common Fund programs (circles) with support from 5 centers. Hover over each part of the wheel for more information.";
+
 function sanitizeUrl(url) {
   if (typeof url !== "string") return "";
   const value = url.trim();
@@ -102,7 +104,7 @@ function buildDccNodes(dccs) {
   return dccs.map((item, index) => {
     const point = getPoint(index, dccs.length);
     return `
-      <g data-wheel-kind="dcc" data-wheel-index="${index}">
+      <g data-wheel-kind="dcc" data-wheel-index="${index}" data-wheel-omics="${escapeHtml((item.omics || []).map(normalizeOmics).filter(Boolean).join(" "))}">
         <circle
           cx="${point.x}"
           cy="${point.y}"
@@ -127,10 +129,39 @@ function buildDccNodes(dccs) {
   }).join("");
 }
 
+const OMICS_BUTTONS = [
+  "Epigenomics",
+  "Genomics",
+  "Glycomics",
+  "Glycoproteomics",
+  "Kinomics",
+  "Lipidomics",
+  "Metabolomics",
+  "Multi-omics",
+  "Proteomics",
+  "Spatial multi-omics",
+  "Spatial proteomics",
+  "Spatial Transcriptomics",
+  "Transcriptomics"
+];
+
+function normalizeOmics(value) {
+  return String(value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function buildOmicsButtons() {
+  return OMICS_BUTTONS.map(
+    (label) => `
+      <button type="button" class="cfde-wheel__omics-btn" data-wheel-omics="${escapeHtml(normalizeOmics(label))}">${escapeHtml(label)}</button>
+    `
+  ).join("");
+}
+
 function buildMarkup(options) {
   return `
     <div class="cfde-wheel__underlay" data-wheel-close="true"></div>
     <button type="button" class="cfde-wheel__close" aria-label="Close CFDE wheel" data-wheel-close="true">✖</button>
+    <div class="cfde-wheel__intro" data-wheel-intro></div>
     <div class="cfde-wheel__content">
       <div class="cfde-wheel__visual">
         <svg class="cfde-wheel__svg" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 382.365 366.599" role="img" aria-label="CFDE wheel">
@@ -159,6 +190,7 @@ function buildMarkup(options) {
         <div class="cfde-wheel__tooltip" hidden></div>
       </div>
     </div>
+    <div class="cfde-wheel__omics-card">${buildOmicsButtons()}</div>
   `;
 }
 
@@ -172,6 +204,8 @@ export class CfdeWheelWidget {
     };
     this.root = null;
     this.tooltipEl = null;
+    this.introEl = null;
+    this.selectedDccIndex = null;
     this.previousBodyOverflow = "";
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleRootClick = this.handleRootClick.bind(this);
@@ -186,6 +220,9 @@ export class CfdeWheelWidget {
     this.root.className = "cfde-wheel";
     this.root.innerHTML = buildMarkup(this.options);
     this.tooltipEl = this.root.querySelector(".cfde-wheel__tooltip");
+    this.introEl = this.root.querySelector("[data-wheel-intro]");
+
+    this.renderIntro(null);
 
     this.root.addEventListener("click", this.handleRootClick);
     this.root.addEventListener("mouseover", this.handlePointerOver);
@@ -212,6 +249,8 @@ export class CfdeWheelWidget {
     this.root.remove();
     this.root = null;
     this.tooltipEl = null;
+    this.introEl = null;
+    this.selectedDccIndex = null;
 
     document.body.style.overflow = this.previousBodyOverflow;
     document.removeEventListener("keydown", this.handleKeydown);
@@ -234,6 +273,11 @@ export class CfdeWheelWidget {
       return;
     }
 
+    // Let the "Visit" link in the intro box open its own tab without toggling selection.
+    if (event.target.closest("[data-wheel-intro]")) {
+      return;
+    }
+
     const centerSlice = event.target.closest(".cfde-wheel__center-slice");
     if (centerSlice) {
       const item = this.options.centers[Number(centerSlice.dataset.wheelIndex)];
@@ -243,12 +287,32 @@ export class CfdeWheelWidget {
 
     const dccNode = event.target.closest("[data-wheel-kind='dcc']");
     if (dccNode) {
-      const item = this.options.dccs[Number(dccNode.dataset.wheelIndex)];
-      this.navigate(item);
+      const index = Number(dccNode.dataset.wheelIndex);
+      if (this.selectedDccIndex === index) {
+        // Same icon clicked again: remove ring, restore original text box.
+        this.selectedDccIndex = null;
+        dccNode.classList.remove("cfde-wheel__dcc--selected");
+        this.renderIntro(null);
+      } else {
+        // New icon: move the orange ring, update text box.
+        if (this.selectedDccIndex !== null) {
+          const prev = this.root.querySelector(`[data-wheel-kind='dcc'][data-wheel-index='${this.selectedDccIndex}']`);
+          if (prev) prev.classList.remove("cfde-wheel__dcc--selected");
+        }
+        this.selectedDccIndex = index;
+        dccNode.classList.add("cfde-wheel__dcc--selected");
+        this.renderIntro(this.options.dccs[index]);
+      }
     }
   }
 
   handlePointerOver(event) {
+    const omicsBtn = event.target.closest(".cfde-wheel__omics-btn");
+    if (omicsBtn) {
+      this.highlightDccsForOmics(omicsBtn.dataset.wheelOmics);
+      return;
+    }
+
     const centerSlice = event.target.closest(".cfde-wheel__center-slice");
     if (centerSlice) {
       const item = this.options.centers[Number(centerSlice.dataset.wheelIndex)];
@@ -259,12 +323,15 @@ export class CfdeWheelWidget {
     const dccNode = event.target.closest("[data-wheel-kind='dcc']");
     if (dccNode) {
       const item = this.options.dccs[Number(dccNode.dataset.wheelIndex)];
-      this.showTooltip(item?.description || "", event.target.getBoundingClientRect());
+      const tooltipText = [item?.short_label, item?.name].filter(Boolean).join("\n");
+      this.showTooltip(tooltipText, event.target.getBoundingClientRect());
+      this.highlightOmics(item?.omics);
+      dccNode.classList.add("cfde-wheel__dcc--active");
     }
   }
 
   handlePointerOut(event) {
-    const leavingRelevantNode = event.target.closest(".cfde-wheel__interactive, [data-wheel-kind='dcc']");
+    const leavingRelevantNode = event.target.closest(".cfde-wheel__interactive, [data-wheel-kind='dcc'], .cfde-wheel__omics-btn");
     if (!leavingRelevantNode) return;
 
     if (event.relatedTarget && leavingRelevantNode.contains(event.relatedTarget)) {
@@ -272,6 +339,38 @@ export class CfdeWheelWidget {
     }
 
     this.hideTooltip();
+    this.clearOmicsHighlight();
+    this.clearDccRingHighlight();
+  }
+
+  highlightDccsForOmics(omicsKey) {
+    if (!this.root || !omicsKey) return;
+    this.root.querySelectorAll("[data-wheel-kind='dcc']").forEach((node) => {
+      const keys = (node.dataset.wheelOmics || "").split(" ");
+      node.classList.toggle("cfde-wheel__dcc--active", keys.includes(omicsKey));
+    });
+  }
+
+  clearDccRingHighlight() {
+    if (!this.root) return;
+    this.root.querySelectorAll(".cfde-wheel__dcc--active").forEach((node) => {
+      node.classList.remove("cfde-wheel__dcc--active");
+    });
+  }
+
+  highlightOmics(omics) {
+    if (!this.root || !Array.isArray(omics)) return;
+    const keys = new Set(omics.map(normalizeOmics).filter(Boolean));
+    this.root.querySelectorAll(".cfde-wheel__omics-btn").forEach((button) => {
+      button.classList.toggle("cfde-wheel__omics-btn--active", keys.has(button.dataset.wheelOmics));
+    });
+  }
+
+  clearOmicsHighlight() {
+    if (!this.root) return;
+    this.root.querySelectorAll(".cfde-wheel__omics-btn--active").forEach((button) => {
+      button.classList.remove("cfde-wheel__omics-btn--active");
+    });
   }
 
   showTooltip(text, rect, yOffset) {
@@ -290,6 +389,32 @@ export class CfdeWheelWidget {
     if (this.tooltipEl) {
       this.tooltipEl.hidden = true;
     }
+  }
+
+  renderIntro(item) {
+    if (!this.introEl) return;
+
+    if (!item || !(item.short_label || item.name || item.description)) {
+      this.introEl.innerHTML = `<div class="cfde-wheel__intro-default">${escapeHtml(DEFAULT_INTRO)}</div>`;
+      return;
+    }
+
+    const shortLabel = item.short_label || "";
+    const name = item.name || "";
+    const description = item.description || "";
+    const homepage = sanitizeUrl(item?.homepage);
+
+    const visitLine = homepage
+      ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(homepage)}" target="_blank" rel="noopener noreferrer">Visit ${escapeHtml(shortLabel)}</a></div>`
+      : `<div class="cfde-wheel__intro-visit">Visit ${escapeHtml(shortLabel)}</div>`;
+
+    this.introEl.innerHTML = [
+      `<div class="cfde-wheel__intro-short">${escapeHtml(shortLabel)}</div>`,
+      `<div class="cfde-wheel__intro-name">${escapeHtml(name)}</div>`,
+      "<br />",
+      `<div class="cfde-wheel__intro-desc">${escapeHtml(description)}</div>`,
+      visitLine
+    ].join("");
   }
 
   navigate(item) {
