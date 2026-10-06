@@ -457,9 +457,12 @@ export class CfdeWheelWidget {
     if (!this.introEl) return;
 
     if (!item || !(item.short_label || item.name || item.description)) {
+      this.introEl.classList.remove("cfde-wheel__intro--detail");
       this.introEl.innerHTML = `<div class="cfde-wheel__intro-default">${escapeHtml(DEFAULT_INTRO)}</div>`;
       return;
     }
+
+    this.introEl.classList.add("cfde-wheel__intro--detail");
 
     const shortLabel = item.short_label || "";
     const name = item.name || "";
