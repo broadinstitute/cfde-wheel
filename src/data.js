@@ -2,6 +2,8 @@ export const DEFAULT_DCCS = [
   {
     id: "65af85ae-82d5-5b81-bc66-6bddaa6420ce",
     short_label: "Kids First",
+    dataurl: "https://cfde.cloud/info/dcc/Kids%20First",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=Kids%20First",
     homepage: "https://portal.kidsfirstdrc.org/",
     icon: "assets/kids-first.png",
     name: "Data, tools, and resources empowering pediatric research",
@@ -13,6 +15,8 @@ export const DEFAULT_DCCS = [
   {
     id: "e332dadd-8084-5fbc-be41-29d75775aab3",
     short_label: "A2CPS",
+    dataurl: "https://cfde.cloud/info/dcc/A2CPS",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=A2CPS",
     homepage: "https://a2cps.org/",
     icon: "assets/a2cps.png",
     name: "Understanding the complex biological processes underlying chronic pain",
@@ -24,6 +28,8 @@ export const DEFAULT_DCCS = [
   {
     id: "803ad44d-e7a2-550a-95c6-57855bf06be8",
     short_label: "HuBMAP",
+    dataurl: "https://cfde.cloud/info/dcc/HuBMAP",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=HuBMAP",
     homepage: "https://hubmapconsortium.org/",
     icon: "assets/hubmap.png",
     name: "Cellular spatial atlas of the human body",
@@ -35,6 +41,8 @@ export const DEFAULT_DCCS = [
   {
     id: "d6bb00c3-7224-5001-b9c5-9838622fba40",
     short_label: "4DN",
+    dataurl: "https://cfde.cloud/info/dcc/4DN",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=4DN",
     homepage: "https://www.4dnucleome.org/",
     icon: "assets/4dn.png",
     name: "Nuclear organization in space and time",
@@ -46,6 +54,8 @@ export const DEFAULT_DCCS = [
   {
     id: "f3f490cf-fd69-579c-8ea3-472c7cf3fb59",
     short_label: "LINCS",
+    dataurl: "https://cfde.cloud/info/dcc/LINCS",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=LINCS",
     homepage: "https://lincsproject.org/LINCS/",
     icon: "assets/lincs-logo.png",
     name: "Omics signatures for drug & target discovery",
@@ -57,6 +67,8 @@ export const DEFAULT_DCCS = [
   {
     id: "a1289ebb-0306-59a1-b0fc-e4d03a4790d7",
     short_label: "IDG",
+    dataurl: "https://cfde.cloud/info/dcc/IDG",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=IDG",
     homepage: "https://druggablegenome.net/",
     icon: "assets/idg.png",
     name: "Illuminating GPCRs, kinases, ion channels, & other drug targets",
@@ -68,6 +80,8 @@ export const DEFAULT_DCCS = [
   {
     id: undefined,
     short_label: "NPH",
+    dataurl: "https://cfde.cloud/info/dcc/NPH",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=NPH",
     homepage: "https://nutritionforprecisionhealth.org/",
     icon: "assets/nph.png",
     name: "Predictive algorithms to advance nutrition research",
@@ -79,6 +93,8 @@ export const DEFAULT_DCCS = [
   {
     id: "e31052b0-ac50-5ede-9828-698ff3610427",
     short_label: "GlyGen",
+    dataurl: "https://cfde.cloud/info/dcc/GlyGen",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=GlyGen",
     homepage: "https://www.glygen.org/",
     icon: "assets/glygen.png",
     name: "Computational and informatics resources for glycoscience",
@@ -90,6 +106,8 @@ export const DEFAULT_DCCS = [
   {
     id: "75b3be39-a021-5d80-b7e2-2a7938a1e11a",
     short_label: "Bridge2AI",
+    dataurl: "https://cfde.cloud/info/dcc/Bridge2AI",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=Bridge2AI",
     homepage: "https://bridge2ai.org/",
     icon: "assets/bridge2ai.png",
     name: "Biomedical AI \u2194 people, data & ethics",
@@ -101,6 +119,8 @@ export const DEFAULT_DCCS = [
   {
     id: "a9aeab22-4fbc-5329-aef6-21110f463c23",
     short_label: "MoTrPAC",
+    dataurl: "https://cfde.cloud/info/dcc/MoTrPAC",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=MoTrPAC",
     homepage: "https://motrpac-data.org/",
     icon: "assets/motrpac.png",
     name: "The molecular map of exercise",
@@ -112,6 +132,8 @@ export const DEFAULT_DCCS = [
   {
     id: "089d8d63-3364-526f-9706-80d62d0ec88c",
     short_label: "Metabolomics Workbench",
+    dataurl: "https://cfde.cloud/info/dcc/Metabolomics",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=Metabolomics%20Workbench",
     homepage: "https://www.metabolomicsworkbench.org/",
     icon: "assets/metabolomics.png",
     name: "Metabolomics",
@@ -123,6 +145,8 @@ export const DEFAULT_DCCS = [
   {
     id: undefined,
     short_label: "SCGE",
+    dataurl: "https://cfde.cloud/info/dcc/SCGE",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=SCGE",
     homepage: "https://scge.mcw.edu/",
     icon: "assets/scge.png",
     name: "Reducing the burden of diseases caused by genetic changes",
@@ -134,6 +158,8 @@ export const DEFAULT_DCCS = [
   {
     id: "2399794e-74c6-5735-a039-0782cdeeb1e2",
     short_label: "SPARC",
+    dataurl: "https://cfde.cloud/info/dcc/SPARC",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=SPARC",
     homepage: "https://sparc.science/",
     icon: "assets/sparc.svg",
     name: "Bridging the body and brain",
@@ -145,6 +171,8 @@ export const DEFAULT_DCCS = [
   {
     id: undefined,
     short_label: "SMaHT",
+    dataurl: "https://cfde.cloud/info/dcc/SMaHT",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=SMaHT",
     homepage: "https://smaht.org/",
     icon: "assets/smaht.png",
     name: "Mapping somatic mutations' health implications",
@@ -156,6 +184,8 @@ export const DEFAULT_DCCS = [
   {
     id: "b3028db2-209c-5862-8f4d-33c5b312332e",
     short_label: "GTEx",
+    dataurl: "https://cfde.cloud/info/dcc/GTEx",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=GTEx",
     homepage: "https://www.gtexportal.org/home/",
     icon: "assets/gtex.png",
     name: "Gene expression and regulation across human tissues",
@@ -167,6 +197,8 @@ export const DEFAULT_DCCS = [
   {
     id: "dd66e8a5-0e05-5a43-a0ca-18cc3698bb36",
     short_label: "SenNet",
+    dataurl: "https://cfde.cloud/info/dcc/SenNet",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=SenNet",
     homepage: "https://sennetconsortium.org/",
     icon: "assets/sennet.png",
     name: "Mapping senescent cells",
@@ -178,6 +210,8 @@ export const DEFAULT_DCCS = [
   {
     id: "f65babf7-2875-5725-9635-210d654533f1",
     short_label: "ExRNA",
+    dataurl: "https://cfde.cloud/info/dcc/ExRNA",
+    knowledgeurl: "https://cfdeknowledge.org/r/kc_programs?DCC=ExRNA",
     homepage: "https://exrna.org/",
     icon: "assets/exrna.png",
     name: "Extracellular RNA communication",

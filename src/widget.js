@@ -207,6 +207,7 @@ export class CfdeWheelWidget {
     this.introEl = null;
     this.selectedDccIndex = null;
     this.previousBodyOverflow = "";
+    this.alignPanels = this.alignPanels.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleRootClick = this.handleRootClick.bind(this);
     this.handlePointerOver = this.handlePointerOver.bind(this);
@@ -233,11 +234,71 @@ export class CfdeWheelWidget {
 
     this.options.target.appendChild(this.root);
 
+    this.alignPanels();
+    window.addEventListener("resize", this.alignPanels);
+
     if (this.options.closeOnEscape) {
       document.addEventListener("keydown", this.handleKeydown);
     }
 
     return this.root;
+  }
+
+  // Align intro top and omics card bottom with the wheel's drawn top/bottom edges.
+  alignPanels() {
+    if (!this.root) return;
+    const svg = this.root.querySelector(".cfde-wheel__svg");
+    const intro = this.root.querySelector(".cfde-wheel__intro");
+    const card = this.root.querySelector(".cfde-wheel__omics-card");
+    if (!svg || !intro || !card) return;
+
+    // Mobile: panels stack under the wheel via CSS, centered and as wide as the drawn wheel.
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      ["top", "right", "bottom"].forEach((p) => {
+        intro.style[p] = "";
+        card.style[p] = "";
+      });
+      let l = Infinity;
+      let r = -Infinity;
+      svg.querySelectorAll(":scope > g").forEach((g) => {
+        const b = g.getBoundingClientRect();
+        if (!b.width) return;
+        l = Math.min(l, b.left);
+        r = Math.max(r, b.right);
+      });
+      if (isFinite(l) && isFinite(r)) {
+        const w = `${Math.round(r - l)}px`;
+        intro.style.width = w;
+        intro.style.maxWidth = w;
+        card.style.width = w;
+        card.style.maxWidth = w;
+      }
+      return;
+    }
+    ["width", "maxWidth"].forEach((p) => {
+      intro.style[p] = "";
+      card.style[p] = "";
+    });
+
+    let top = Infinity;
+    let bottom = -Infinity;
+    let left = Infinity;
+    svg.querySelectorAll(":scope > g").forEach((g) => {
+      const r = g.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      top = Math.min(top, r.top);
+      bottom = Math.max(bottom, r.bottom);
+      left = Math.min(left, r.left);
+    });
+    if (!isFinite(top) || !isFinite(bottom)) return;
+
+    const rootRect = this.root.getBoundingClientRect();
+    // Right margin equals the gap between the wheel and the left edge.
+    const gap = Math.max(0, Math.round(left - rootRect.left));
+    intro.style.right = `${gap}px`;
+    card.style.right = `${Math.max(0, gap - 20)}px`; // card has 20px side padding
+    intro.style.top = `${Math.round(top - rootRect.top) + 15}px`;
+    card.style.bottom = `${Math.round(rootRect.bottom - bottom) + 15}px`;
   }
 
   close() {
@@ -246,6 +307,7 @@ export class CfdeWheelWidget {
     this.root.removeEventListener("click", this.handleRootClick);
     this.root.removeEventListener("mouseover", this.handlePointerOver);
     this.root.removeEventListener("mouseout", this.handlePointerOut);
+    window.removeEventListener("resize", this.alignPanels);
     this.root.remove();
     this.root = null;
     this.tooltipEl = null;
@@ -408,12 +470,22 @@ export class CfdeWheelWidget {
       ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(homepage)}" target="_blank" rel="noopener noreferrer">Visit ${escapeHtml(shortLabel)}</a></div>`
       : `<div class="cfde-wheel__intro-visit">Visit ${escapeHtml(shortLabel)}</div>`;
 
+    const dataUrl = sanitizeUrl(item?.dataurl);
+    const dataLine = dataUrl
+      ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(dataUrl)}" target="_blank" rel="noopener noreferrer">Explore Data</a></div>`
+      : "";
+    const knowledgeUrl = sanitizeUrl(item?.knowledgeurl);
+    const knowledgeLine = knowledgeUrl
+      ? `<div class="cfde-wheel__intro-visit"><a href="${escapeHtml(knowledgeUrl)}" target="_blank" rel="noopener noreferrer">Explore Knowledge</a></div>`
+      : "";
+    const linksBlock = `<div class="cfde-wheel__intro-links">${visitLine}${dataLine}${knowledgeLine}</div>`;
+
     this.introEl.innerHTML = [
       `<div class="cfde-wheel__intro-short">${escapeHtml(shortLabel)}</div>`,
       `<div class="cfde-wheel__intro-name">${escapeHtml(name)}</div>`,
       "<br />",
       `<div class="cfde-wheel__intro-desc">${escapeHtml(description)}</div>`,
-      visitLine
+      linksBlock
     ].join("");
   }
 

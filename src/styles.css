@@ -78,6 +78,21 @@
   line-height: 1.45;
 }
 
+.cfde-wheel__intro-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+@media (max-width: 768px) {
+  .cfde-wheel__intro-links {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
 .cfde-wheel__intro-visit {
   text-align: right;
   font-size: 15px;
@@ -101,19 +116,19 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 6px;
   width: 480px;
-  padding: 16px;
+  padding: 0 20px;
   background: transparent;
 }
 
 .cfde-wheel__omics-btn {
-  padding: 8px 14px;
+  padding: 6px 10px;
   border: 0;
   border-radius: 4px;
   background: #fff;
   color: #000;
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
@@ -147,6 +162,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 480px;
+  transform: translateX(-10px);
 }
 
 .cfde-wheel__svg {
@@ -218,13 +234,52 @@
 }
 
 @media (max-width: 768px) {
+  .cfde-wheel {
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    padding-bottom: 24px;
+  }
+
+  .cfde-wheel__underlay {
+    position: fixed;
+  }
+
   .cfde-wheel__content {
+    order: 1;
+    flex: none;
+    height: auto;
     padding: 20px;
   }
 
   .cfde-wheel__close {
+    position: fixed;
     top: 12px;
     right: 12px;
+  }
+
+  .cfde-wheel__intro,
+  .cfde-wheel__omics-card {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    align-self: center;
+    width: calc(100% - 40px);
+    margin: 0 auto 16px;
+  }
+
+  .cfde-wheel__omics-card {
+    justify-content: center;
+  }
+
+  .cfde-wheel__intro {
+    order: 2;
+  }
+
+  .cfde-wheel__omics-card {
+    order: 3;
+    padding: 0;
   }
 
   .cfde-wheel__svg {
@@ -234,11 +289,10 @@
 
   .cfde-wheel__visual {
     margin-right: 0;
+    transform: none;
   }
 
   .cfde-wheel__intro {
-    width: 260px;
-    max-width: 260px;
     padding: 12px 14px;
     font-size: 14px;
   }
@@ -261,11 +315,6 @@
 
   .cfde-wheel__intro-visit {
     font-size: 12px;
-  }
-
-  .cfde-wheel__omics-card {
-    width: 260px;
-    max-width: 260px;
   }
 
   .cfde-wheel__tooltip {
