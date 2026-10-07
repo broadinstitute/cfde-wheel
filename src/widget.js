@@ -13,7 +13,7 @@ const RING_RADIUS = 150;
 const CIRCLE_SIZE = 35;
 const ICON_SIZE = 30;
 
-const DEFAULT_INTRO = "The Common Fund Data Ecosystem (CFDE) integrates data and resources from across NIH Common Fund programs (circles) with support from 5 centers. Hover over each part of the wheel for more information.";
+const DEFAULT_INTRO = "The Common Fund Data Ecosystem (CFDE) integrates data and resources from across NIH Common Fund programs (circles) with support from 5 centers. Hover over or click on each part of the wheel for more information.";
 
 function sanitizeUrl(url) {
   if (typeof url !== "string") return "";
