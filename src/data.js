@@ -88,7 +88,7 @@ export const DEFAULT_DCCS = [
     description: "",
     short_description: "",
     data_resources: "",
-    omics: []
+    omics: ["Genomics", "Metabolomics", "Proteomics"]
   },
   {
     id: "e31052b0-ac50-5ede-9828-698ff3610427",
@@ -153,7 +153,7 @@ export const DEFAULT_DCCS = [
     description: "",
     short_description: "",
     data_resources: "",
-    omics: []
+    omics: ["Genomics", "Transcriptomics"]
   },
   {
     id: "2399794e-74c6-5735-a039-0782cdeeb1e2",
