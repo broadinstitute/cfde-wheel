@@ -229,7 +229,7 @@ export const DEFAULT_CENTERS = [
     yOffset: 100
   },
   {
-    homepage: "https://cfdecloud.org",
+    homepage: "https://cfdeworkspace.org/",
     short_label: "The Cloud Workspace Implementation Center",
     yOffset: 120
   },
